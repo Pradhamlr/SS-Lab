@@ -53,7 +53,7 @@ void findTimes(struct process p[],int n)
             currentTime++;
             continue;
         }
-        printf("%d|P[%d]|%d\n",currentTime,p[index].id,currentTime+p[index].bt);
+        printf("|%d\t|P[%d]|\t%d|\t",currentTime,p[index].id,currentTime+p[index].bt);
         p[index].wt=currentTime-p[index].at;
         p[index].ta=p[index].wt+p[index].bt;
         currentTime+=p[index].bt;
