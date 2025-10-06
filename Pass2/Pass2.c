@@ -1,112 +1,92 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 int main() {
-    int start, length, temp;
-    char addr[10], label[10], opcode[10], operand[10];
-    char mnemonic[10], code[10];
-    char symbol[10], symaddr[10];
+    FILE *inter, *optab, *symtab, *object;
+    char label[30], opcode[15], operand[15];
+    char opt_opcode[15], opt_value[15];
+    char sym_label[30];
+    int sym_addr, locctr, start_addr = 0, program_length = 0;
 
-    FILE *inter, *optab, *symtab, *asml, *objc, *leng;
-
+    // Open files
     inter = fopen("intermediate.txt", "r");
     optab = fopen("optab.txt", "r");
-    symtab = fopen("symtab.txt", "r");
-    asml = fopen("asml.txt", "w");
-    objc = fopen("objc.txt", "w");
-    leng = fopen("length.txt", "r");
+    symtab = fopen("symbol.txt", "r");
+    object = fopen("objectcode.txt", "w");
 
-    if (!inter || !optab || !symtab || !asml || !objc || !leng) {
-        printf("Error: Could not open one or more files.\n");
+    if (!inter || !optab || !symtab || !object) {
+        printf("Error opening files.\n");
         return 1;
     }
 
-    fscanf(leng, "%d", &length);
-    fscanf(inter, "%s %s %s %s", addr, label, opcode, operand);
+    // Read first line
+    fscanf(inter, "%x %s %s %s", &locctr, label, opcode, operand);
 
+    // START directive → Header record
     if (strcmp(opcode, "START") == 0) {
-        start = atoi(operand);
-        fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%-10s\n", "~", label, opcode, operand, "~");
-        fprintf(objc, "H^%-6s^%06X^%06X\n", label, start, length);
-        fscanf(inter, "%s %s %s %s", addr, label, opcode, operand);
-    } else {
-        start = 0;
+        start_addr = (int)strtol(operand, NULL, 16);
+        fprintf(object, "H^%-6s^%06X^", label, start_addr);
+        fscanf(inter, "%x %s %s %s", &locctr, label, opcode, operand);
     }
 
-    fprintf(objc, "T^%06X^", start);
+    fprintf(object, "\nT^%06X^", locctr); // Start Text record
 
+    // Process all lines until END
     while (strcmp(opcode, "END") != 0) {
         int found = 0;
-        rewind(optab);
 
-        while (fscanf(optab, "%s %s", mnemonic, code) != EOF) {
-            if (strcmp(mnemonic, opcode) == 0) {
-                found = 1;
+        // Search opcode in OPTAB
+        rewind(optab);
+        while (fscanf(optab, "%s %s", opt_opcode, opt_value) == 2) {
+            if (strcmp(opcode, opt_opcode) == 0) {
+                // Get operand address from SYMTAB
                 rewind(symtab);
                 int sym_found = 0;
-                while (fscanf(symtab, "%s %s", symbol, symaddr) != EOF) {
-                    if (strcmp(symbol, operand) == 0) {
-                        char objcode[20];
-                        strcpy(objcode, code);
-                        strcat(objcode, symaddr); // Removed redundant strcpy
-
-                        fprintf(objc, "%s^", objcode);
-                        fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%-10s\n", addr, label, opcode, operand, objcode);
+                while (fscanf(symtab, "%s %x", sym_label, &sym_addr) == 2) {
+                    if (strcmp(sym_label, operand) == 0) {
+                        fprintf(object, "%s%04X^", opt_value, sym_addr);
                         sym_found = 1;
                         break;
                     }
                 }
-
                 if (!sym_found) {
-                    char objcode[20];
-                    strcpy(objcode, code);
-                    strcat(objcode, "0000"); // Use placeholder if symbol not found
-
-                    fprintf(objc, "%s^", objcode);
-                    fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%-10s\n", addr, label, opcode, operand, objcode);
+                    fprintf(object, "%s0000^", opt_value); // undefined symbol
                 }
+                found = 1;
                 break;
             }
         }
 
+        // Handle assembler directives
         if (!found) {
             if (strcmp(opcode, "WORD") == 0) {
-                temp = atoi(operand);
-                fprintf(objc, "%06X^", temp);
-                fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%06X\n", addr, label, opcode, operand, temp);
+                fprintf(object, "%06X^", atoi(operand));
             } else if (strcmp(opcode, "BYTE") == 0) {
-                if (operand[0] == 'C') {
-                    for (int i = 2; i < (int)strlen(operand) - 1; i++) {
-                        fprintf(objc, "%02X", operand[i]);
-                    }
-                    fprintf(objc, "^");
-                    fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%s\n", addr, label, opcode, operand, operand);
-                } else if (operand[0] == 'X') {
-                    for (int i = 2; i < (int)strlen(operand) - 1; i++) {
-                        fprintf(objc, "%c", operand[i]);
-                    }
-                    fprintf(objc, "^");
-                    fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%s\n", addr, label, opcode, operand, operand);
+                if (operand[0] == 'C') { // C'EOF'
+                    for (int i = 2; i < strlen(operand) - 1; i++)
+                        fprintf(object, "%02X", operand[i]);
+                    fprintf(object, "^");
+                } else if (operand[0] == 'X') { // X'F1'
+                    fprintf(object, "%02X^", (int)strtol(&operand[2], NULL, 16));
                 }
-            } else {
-                fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\n", addr, label, opcode, operand);
             }
+            // RESW/RESB → skip object code (no output)
         }
 
-        fscanf(inter, "%s %s %s %s", addr, label, opcode, operand);
+        // Read next line
+        fscanf(inter, "%x %s %s %s", &locctr, label, opcode, operand);
     }
 
-    fprintf(asml, "%-6s\t%-6s\t%-6s\t%-6s\t%-10s\n", "~", "~", "END", "~", "~");
-    fprintf(objc, "\nE^%06X\n", start);
+    // END record
+    fprintf(object, "\nE^%06X\n", start_addr);
 
+    printf("✅ PASS 2 completed! Object code written to objectcode.txt\n");
+
+    fclose(inter);
     fclose(optab);
     fclose(symtab);
-    fclose(asml);
-    fclose(objc);
-    fclose(inter);
-    fclose(leng);
+    fclose(object);
 
-    printf("Pass 2 completed successfully.\n");
     return 0;
 }
