@@ -1,0 +1,32 @@
+SET SERVEROUTPUT ON;
+
+CREATE OR REPLACE FUNCTION calc_bill (
+    p_cust_no IN NUMBER,
+    p_units IN NUMBER
+) RETURN FLOAT
+IS
+    v_amount FLOAT;
+BEGIN
+    IF p_units <= 100 THEN
+        v_amount := p_units * 1.5;
+    ELSIF p_units <= 200 THEN
+        v_amount := (100 * 1.5) + (p_units - 100) * 2;
+    ELSE
+        v_amount := (100 * 1.5) + (100 * 2) + (p_units - 200) * 3;
+    END IF;
+
+    INSERT INTO Bill (cust_no, units_consumed, amount)
+    VALUES (p_cust_no, p_units, v_amount);
+
+    COMMIT;
+
+    RETURN v_amount;
+END;
+/
+DECLARE
+    total FLOAT;
+BEGIN
+    total := calc_bill(101, 250);
+    DBMS_OUTPUT.PUT_LINE('Total Bill Amount: ' || total);
+END;
+/
