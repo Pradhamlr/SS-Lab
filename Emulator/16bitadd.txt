@@ -1,0 +1,59 @@
+DATA SEGMENT
+    MSG1 DB 10,13,'Enter first number (0-9): $'
+    MSG2 DB 10,13,'Enter second number (0-9): $'
+    MSG3 DB 10,13,'SUM = $'
+    NUM1 DB ?
+    NUM2 DB ?
+    SUM  DB ?
+DATA ENDS
+
+CODE SEGMENT
+    ASSUME CS:CODE, DS:DATA
+
+START:
+    MOV AX, DATA
+    MOV DS, AX
+
+    ; --- Input first number ---
+    LEA DX, MSG1
+    MOV AH, 09H
+    INT 21H
+
+    MOV AH, 01H
+    INT 21H
+    SUB AL, 30H          ; Convert ASCII to number
+    MOV NUM1, AL
+
+    ; --- Input second number ---
+    LEA DX, MSG2
+    MOV AH, 09H
+    INT 21H
+
+    MOV AH, 01H
+    INT 21H
+    SUB AL, 30H
+    MOV NUM2, AL
+
+    ; --- Add numbers ---
+    MOV AL, NUM1
+    ADD AL, NUM2
+    MOV SUM, AL
+
+    ; --- Display sum message ---
+    LEA DX, MSG3
+    MOV AH, 09H
+    INT 21H
+
+    ; --- Display sum ---
+    MOV AL, SUM
+    ADD AL, 30H           ; Convert number to ASCII
+    MOV DL, AL
+    MOV AH, 02H
+    INT 21H
+
+    ; --- Exit program ---
+    MOV AH, 4CH
+    INT 21H
+
+CODE ENDS
+END START
