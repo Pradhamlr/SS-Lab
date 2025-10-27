@@ -35,11 +35,9 @@ int main() {
             }
         }
         else if (line[0] == 'E') {
-            char exec[10];
-            if (sscanf(line, "E^%s", exec) == 1)
-                printf("Execution starts at: %s\n", exec);
-            else
-                printf("Execution starts at program start\n");
+            {
+            printf("\nEnd of program\n");
+         }
         }
     }
 
