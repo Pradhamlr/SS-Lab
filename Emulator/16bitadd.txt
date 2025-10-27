@@ -1,8 +1,8 @@
 DATA SEGMENT
     N1 DW 0003H
     N2 DW 0004H
-    SUM DW ?          ; optional keep in memory if you like
-    CARRY DB ?        ; optional memory copy (not required)
+    SUM DW ?          
+    CARRY DB ?        
 DATA ENDS
 
 CODE SEGMENT
@@ -12,14 +12,14 @@ START:
     MOV AX, DATA
     MOV DS, AX
 
-    MOV AX, N1        ; AX <- N1
-    ADD AX, N2        ; AX = N1 + N2 ; flags updated
-    MOV BL, 0         ; default carry in BL = 0
+    MOV AX, N1       
+    ADD AX, N2        
+    MOV BL, 0         
     JNC NO_CARRY
-    MOV BL, 1         ; if carry set, BL = 1
+    MOV BL, 1         
 NO_CARRY:
 
-    ; optional: store in memory too if you want a persistent copy
+  
     MOV SUM, AX
     MOV CARRY, BL
 
