@@ -17,7 +17,8 @@ int main() {
     } 
     fscanf(inp, "%s %s %s", label, opcode, 
     operand); 
-    if (strcmp(opcode, "START") == 0) { 
+    if (strcmp(opcode, "START") == 0)
+     { 
         locctr = (int)strtol(operand, NULL, 16); 
         start = locctr; 
     fprintf(inter, "%-8X%-8s%-8s%s\n", locctr, 
@@ -35,7 +36,9 @@ int main() {
             locctr); 
         } 
         fprintf(inter, "%-8X%-8s%-8s%s\n", locctr, 
-        label, opcode, operand); 
+        label, opcode, operand);
+        
+        
         rewind(optab); 
         int found = 0; 
         while (fscanf(optab, "%s %s", 
