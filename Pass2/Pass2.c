@@ -3,22 +3,25 @@
 #include <string.h>
 
 int main() {
-    FILE *inter, *optab, *symtab, *object;
+    FILE *inter, *optab, *symtab, *object, *len;
     char label[30], opcode[15], operand[15];
     char opt_opcode[15], opt_value[15];
     char sym_label[30];
-    int sym_addr, locctr, start_addr = 0, program_length = 0;
+    int sym_addr, locctr, start_addr = 0, program_length = 0, length;
 
     // Open files
     inter = fopen("intermediate.txt", "r");
     optab = fopen("optab.txt", "r");
     symtab = fopen("symbol.txt", "r");
     object = fopen("objectcode.txt", "w");
+    len = fopen("length.txt", "r");
 
     if (!inter || !optab || !symtab || !object) {
         printf("Error opening files.\n");
         return 1;
     }
+
+    fscanf(len, "%X", &length);
 
     // Read first line
     fscanf(inter, "%x %s %s %s", &locctr, label, opcode, operand);
@@ -26,7 +29,7 @@ int main() {
     // START directive → Header record
     if (strcmp(opcode, "START") == 0) {
         start_addr = (int)strtol(operand, NULL, 16);
-        fprintf(object, "H^%-6s^%06X^", label, start_addr);
+        fprintf(object, "H^%-6s^%06X^%06X", label, start_addr, length);
         fscanf(inter, "%x %s %s %s", &locctr, label, opcode, operand);
     }
 
