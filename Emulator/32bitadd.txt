@@ -1,0 +1,40 @@
+DATA SEGMENT
+    N1_LOW  DW 5678H
+    N1_HIGH DW 1234H   ; N1 = 12345678H
+    N2_LOW  DW 4321H
+    N2_HIGH DW 8765H   ; N2 = 87654321H
+    SUM_LOW  DW ?
+    SUM_HIGH DW ?
+    CARRY    DB ?
+DATA ENDS
+
+CODE SEGMENT
+    ASSUME CS:CODE, DS:DATA
+
+START:
+    MOV AX, DATA
+    MOV DS, AX
+
+    ; Add lower 16 bits
+    MOV AX, N1_LOW
+    ADD AX, N2_LOW
+    MOV SUM_LOW, AX     ; store lower part
+    MOV BL, 0
+    JNC NO_CARRY1
+    MOV BL, 1
+NO_CARRY1:
+
+    ; Add upper 16 bits + carry from lower
+    MOV AX, N1_HIGH
+    ADC AX, N2_HIGH     ; ADC = ADD with Carry
+    MOV SUM_HIGH, AX
+    JNC NO_CARRY2
+    MOV BL, 1
+NO_CARRY2:
+
+    MOV CARRY, BL
+
+    MOV AH, 4CH
+    INT 21H
+CODE ENDS
+END START
