@@ -26,7 +26,7 @@ int main()
             char prog[20], start[20], length[20];
             sscanf(line, "H^%[^^]^%[^^]^%s", prog, start, length);
             program_start = (int)strtol(start, NULL, 16);
-            relocation = actual_start - program_start;  // ✅ calculate relocation factor
+            relocation = actual_start - program_start; 
 
             printf("Program name: %s , Starting address: %s , Length: %s\n",
                    prog, start, length);

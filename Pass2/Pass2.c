@@ -84,7 +84,7 @@ int main() {
     // END record
     fprintf(object, "\nE^%06X\n", start_addr);
 
-    printf("✅ PASS 2 completed! Object code written to objectcode.txt\n");
+    printf(" PASS 2 completed! Object code written to objectcode.txt\n");
 
     fclose(inter);
     fclose(optab);

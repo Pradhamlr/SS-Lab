@@ -2,7 +2,7 @@
 #include <string.h> 
 #include <stdlib.h> 
 int main() { 
-    char opcode[15], operand[30], label[15]; 
+    char label[15], opcode[15], operand[30]; 
     char optab_opcode[15], optab_value[15]; 
     int locctr, start, length; 
     FILE *inp, *symtab, *optab, *inter, *leng; 

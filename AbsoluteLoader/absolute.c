@@ -34,10 +34,9 @@ int main() {
                 }
             }
         }
-        else if (line[0] == 'E') {
-            {
+        else if (line[0] == 'E') 
+        {
             printf("\nEnd of program\n");
-         }
         }
     }
 
