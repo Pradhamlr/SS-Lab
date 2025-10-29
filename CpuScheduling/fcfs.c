@@ -32,12 +32,14 @@ void sortByArrival(struct process p[],int n)
 void findTimes(struct process p[],int n)
 {
     int currentTime=0;
+    printf("GAANT CHART\n");
     for(int i=0;i<n;i++)
     {
         if(currentTime<p[i].at)
         {
             currentTime=p[i].at;
         }
+        printf("|%d\t|P[%d]|\t%d|\t",currentTime,p[i].id,currentTime+p[i].bt);
         p[i].wt=currentTime-p[i].at;
         p[i].ta=p[i].wt+p[i].bt;
         currentTime+=p[i].bt;
@@ -59,51 +61,6 @@ void printr(struct process p[],int n)
 
     printf("\nAverage Waiting Time : %.2f",totalwt/n);
     printf("\nAverage Turnaround Time : %.2f\n",totalta/n);
-
-   
-    printf("\nGantt Chart:\n ");
-
-    for(int i=0;i<n;i++)
-    {
-        for(int j=0;j<p[i].bt;j++)
-            printf("--");
-        printf(" ");
-    }
-    printf("\n|");
-
-
-    for(int i=0;i<n;i++)
-    {
-        for(int j=0;j<p[i].bt-1;j++)
-            printf(" ");
-        printf("P%d",p[i].id);
-        for(int j=0;j<p[i].bt-1;j++)
-            printf(" ");
-        printf("|");
-    }
-
-    printf("\n ");
-    for(int i=0;i<n;i++)
-    {
-        for(int j=0;j<p[i].bt;j++)
-            printf("--");
-        printf(" ");
-    }
-
-    // Time line
-    printf("\n");
-    int time=0;
-    printf("%d",p[0].at>0?p[0].at:0);
-    time=(p[0].at>0)?p[0].at:0;
-
-    for(int i=0;i<n;i++)
-    {
-        if(time<p[i].at)
-            time=p[i].at;
-        time+=p[i].bt;
-        printf("%*d",p[i].bt*2,time); 
-    }
-    printf("\n");
 }
 
 void main()
