@@ -3,6 +3,7 @@ DATA SEGMENT
     MSG2 DB 13,10,'String Is Palindrome$'
     MSG3 DB 13,10,'String Is Not Palindrome$'
     STR1 DB 50 DUP(0)
+    LEN  DB 0
 DATA ENDS
 
 CODE SEGMENT
@@ -20,6 +21,7 @@ START:
     LEA DI, STR1
 
     MOV AH, 01H
+    MOV CL, 0
 
 NEXT:
     INT 21H
@@ -27,11 +29,13 @@ NEXT:
     JE TERMINATE
     MOV [DI], AL
     INC DI
+    INC CL
     JMP NEXT
 
 TERMINATE:
     MOV AL, '$'
     MOV [DI], AL
+    MOV LEN, CL
 
 DOTHIS:
     DEC DI
