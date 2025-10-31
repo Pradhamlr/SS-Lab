@@ -1,3 +1,0 @@
-LDA 00
-ADD 18
-STA 0C
