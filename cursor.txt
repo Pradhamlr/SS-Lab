@@ -1,0 +1,44 @@
+SET SERVEROUTPUT ON;
+DECLARE
+    CURSOR c1 IS
+        SELECT c.cust_name, COUNT(o.order_id) AS total_orders
+        FROM CUSTOMER c
+        LEFT JOIN ORDERS o ON c.cust_id = o.cust_id
+        GROUP BY c.cust_name;
+    v_name CUSTOMER.cust_name%TYPE;
+    v_count NUMBER;
+BEGIN
+    OPEN c1;
+    LOOP
+        FETCH c1 INTO v_name, v_count;
+        EXIT WHEN c1%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Customer: ' || v_name || ' | Orders: ' || v_count);
+    END LOOP;
+    CLOSE c1;
+END;
+/
+
+
+
+
+
+SET SERVEROUTPUT ON;
+DECLARE
+    CURSOR c1 IS
+        SELECT c.centre_name, COUNT(a.stud_id) AS total_students
+        FROM CENTRE c
+        LEFT JOIN ALLOTMENT a ON c.centre_id = a.centre_id
+        GROUP BY c.centre_name;
+        
+    v_name CENTRE.centre_name%TYPE;
+    v_count NUMBER;
+BEGIN
+    OPEN c1;
+    LOOP
+        FETCH c1 INTO v_name, v_count;
+        EXIT WHEN c1%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Centre: ' || v_name || ' - Students Allotted: ' || v_count);
+    END LOOP;
+    CLOSE c1;
+END;
+/

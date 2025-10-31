@@ -1,0 +1,44 @@
+CREATE OR REPLACE TRIGGER trg_assign_rank
+AFTER INSERT OR UPDATE OF total_marks ON STUDENT
+FOR EACH ROW
+DECLARE
+BEGIN
+    UPDATE STUDENT s
+    SET rank = (
+        SELECT COUNT(*) + 1
+        FROM STUDENT
+        WHERE total_marks > s.total_marks
+    )
+    WHERE s.stud_id = :NEW.stud_id;
+END;
+/
+
+
+
+
+
+SET SERVEROUTPUT ON;
+
+CREATE OR REPLACE TRIGGER trg_capacity_full
+BEFORE INSERT ON allotment
+FOR EACH ROW
+DECLARE
+    v_capacity center.capacity%TYPE;
+    v_count NUMBER;
+BEGIN
+    -- Get the capacity of the center
+    SELECT capacity INTO v_capacity
+    FROM center
+    WHERE center_id = :NEW.center_id;
+
+    -- Count how many students are already allotted
+    SELECT COUNT(*) INTO v_count
+    FROM allotment
+    WHERE center_id = :NEW.center_id;
+
+    -- Check if capacity is full
+    IF v_count >= v_capacity THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Center is already full. Cannot allot new student.');
+    END IF;
+END;
+/

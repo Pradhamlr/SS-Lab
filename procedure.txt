@@ -1,0 +1,53 @@
+SET SERVEROUTPUT ON;
+CREATE OR REPLACE PROCEDURE disp_above_avg IS
+BEGIN
+    FOR rec IN (
+        SELECT s.stud_id, s.stud_name, s.city, s.total_marks
+        FROM STUDENT s
+        WHERE s.total_marks > (
+            SELECT AVG(total_marks) FROM STUDENT WHERE city = s.city
+        )
+    )
+    LOOP
+        DBMS_OUTPUT.PUT_LINE('Student: ' || rec.stud_name || 
+                             ' | City: ' || rec.city ||
+                             ' | Marks: ' || rec.total_marks);
+    END LOOP;
+END;
+/
+
+
+BEGIN
+    disp_above_avg;
+END;
+/
+
+
+SET SERVEROUTPUT ON;
+CREATE OR REPLACE PROCEDURE disp_above_avg_spenders IS
+BEGIN
+    FOR rec IN (
+        SELECT c.cust_name, SUM(o.total_amount) AS total_spent
+        FROM CUSTOMER c
+        JOIN ORDERS o ON c.cust_id = o.cust_id
+        GROUP BY c.cust_name
+        HAVING SUM(o.total_amount) > (
+            SELECT AVG(total_spent)
+            FROM (
+                SELECT SUM(total_amount) AS total_spent
+                FROM ORDERS
+                GROUP BY cust_id
+            )
+        )
+    )
+    LOOP
+        DBMS_OUTPUT.PUT_LINE('Customer: ' || rec.cust_name || ' | Spent: ' || rec.total_spent);
+    END LOOP;
+END;
+/
+
+-- Execute
+BEGIN
+    disp_above_avg_spenders;
+END;
+/
