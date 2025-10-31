@@ -27,32 +27,42 @@ BEGIN
     RETURN result;
 END;
 /
-
-
 BEGIN
-    DBMS_OUTPUT.PUT_LINE('Fibonacci Series: ' || fibonacci_series(&n));
+    DBMS_OUTPUT.PUT_LINE(fibonacci_series(&n));
 END;
-/
+
 
 
 SET SERVEROUTPUT ON;
 
-CREATE OR REPLACE PROCEDURE fibonacci_series(limit NUMBER)
+CREATE OR REPLACE PROCEDURE fibonacci_series_proc(n NUMBER)
 IS
     a NUMBER := 0;
     b NUMBER := 1;
     c NUMBER;
+    i NUMBER;
 BEGIN
-    DBMS_OUTPUT.PUT_LINE('Fibonacci Series up to ' || limit || ':');
-    DBMS_OUTPUT.PUT(a || ' ' || b || ' ');
+    IF n >= 1 THEN
+        DBMS_OUTPUT.PUT(a || ' ');
+    END IF;
 
-    LOOP
+    IF n >= 2 THEN
+        DBMS_OUTPUT.PUT(b || ' ');
+    END IF;
+
+    FOR i IN 3..n LOOP
         c := a + b;
-        EXIT WHEN c > limit;
         DBMS_OUTPUT.PUT(c || ' ');
         a := b;
         b := c;
     END LOOP;
+
     DBMS_OUTPUT.NEW_LINE;
+END;
+/
+
+
+BEGIN
+    fibonacci_series_proc(&n);
 END;
 /
