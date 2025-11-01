@@ -1,0 +1,57 @@
+CREATE OR REPLACE FUNCTION fn_discharge_patient(p_pid NUMBER)
+RETURN NUMBER
+IS
+    v_pname      PATIENTS.PNAME%TYPE;
+    v_paddress   PATIENTS.PADDRESS%TYPE;
+    v_disease    DETAILS.DISEASE%TYPE;
+    v_doctor     DETAILS.DOCTORNAME%TYPE;
+    v_admitdate  DETAILS.ADMITDATE%TYPE;
+    v_days       NUMBER;
+    v_amount     NUMBER;
+BEGIN
+    
+    SELECT p.PNAME, p.PADDRESS, d.DISEASE, d.DOCTORNAME, d.ADMITDATE
+    INTO v_pname, v_paddress, v_disease, v_doctor, v_admitdate
+    FROM PATIENTS p
+    JOIN DETAILS d ON p.PID = d.PID
+    WHERE p.PID = p_pid;
+
+    
+    v_days := TRUNC(SYSDATE - v_admitdate);
+    IF v_days = 0 THEN
+        v_days := 1;
+    END IF;
+
+   
+    v_amount := v_days * 1000;
+
+  
+    UPDATE DETAILS
+    SET AMTPAID = v_amount
+    WHERE PID = p_pid;
+
+   
+    INSERT INTO HISTORY (PID, PNAME, ADDRESS, DISEASE, DOCTORNAME, DISCHDATE)
+    VALUES (p_pid, v_pname, v_paddress, v_disease, v_doctor, SYSDATE);
+
+   
+    DELETE FROM PATIENTS WHERE PID = p_pid;
+
+    RETURN v_amount;
+END;
+/
+
+
+CREATE OR REPLACE TRIGGER trg_move_to_history
+AFTER UPDATE OF DISCHARGED ON DETAILS
+FOR EACH ROW
+WHEN (NEW.DISCHARGED = 'Y')
+DECLARE
+    v_amt NUMBER;
+BEGIN
+    -- Call the discharge function
+    v_amt := fn_discharge_patient(:NEW.PID);
+
+    DBMS_OUTPUT.PUT_LINE('Patient discharged. Amount paid: Rs ' || v_amt);
+END;
+/

@@ -42,3 +42,42 @@ BEGIN
     CLOSE c1;
 END;
 /
+
+
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+    CURSOR c1 IS
+        SELECT workerid, salary
+        FROM salariedworker;
+
+    v_id salariedworker.workerid%TYPE;
+    v_sal salariedworker.salary%TYPE;
+    v_tax NUMBER(10,2);
+BEGIN
+    OPEN c1;
+    LOOP
+        FETCH c1 INTO v_id, v_sal;
+        EXIT WHEN c1%NOTFOUND;
+
+        IF v_sal <= 5000 THEN
+            v_tax := v_sal * 0.05;
+        ELSIF v_sal <= 8000 THEN
+            v_tax := v_sal * 0.10;
+        ELSIF v_sal <= 10000 THEN
+            v_tax := v_sal * 0.15;
+        ELSE
+            v_tax := 0;
+        END IF;
+
+        UPDATE salariedworker
+        SET tax = v_tax
+        WHERE workerid = v_id;
+
+        DBMS_OUTPUT.PUT_LINE('Worker ID: '||v_id||' | Tax Updated: '||v_tax);
+    END LOOP;
+
+    CLOSE c1;
+END;
+/

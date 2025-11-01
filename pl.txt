@@ -30,3 +30,31 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Total Bill Amount: ' || total);
 END;
 /
+
+
+
+SET SERVEROUTPUT ON;
+
+CREATE OR REPLACE PROCEDURE calc_bill (
+    p_cust_no IN NUMBER,
+    p_units IN NUMBER
+)
+IS
+    v_amount FLOAT;
+BEGIN
+    IF p_units <= 100 THEN
+        v_amount := p_units * 1.5;
+    ELSIF p_units <= 200 THEN
+        v_amount := (100 * 1.5) + (p_units - 100) * 2;
+    ELSE
+        v_amount := (100 * 1.5) + (100 * 2) + (p_units - 200) * 3;
+    END IF;
+
+    INSERT INTO Bill (cust_no, units_consumed, amount)
+    VALUES (p_cust_no, p_units, v_amount);
+
+    COMMIT;
+
+    DBMS_OUTPUT.PUT_LINE('Total Bill Amount: ' || v_amount);
+END;
+/
