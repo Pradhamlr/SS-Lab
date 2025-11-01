@@ -1,0 +1,34 @@
+CREATE OR REPLACE PACKAGE math_ops AS
+    PROCEDURE find_square(num IN NUMBER);
+    PROCEDURE find_cube(num IN NUMBER);
+END math_ops;
+/
+
+
+CREATE OR REPLACE PACKAGE BODY math_ops AS
+
+    PROCEDURE find_square(num IN NUMBER) IS
+        sq NUMBER;
+    BEGIN
+        sq := num * num;
+        DBMS_OUTPUT.PUT_LINE('Square of ' || num || ' = ' || sq);
+    END find_square;
+
+    PROCEDURE find_cube(num IN NUMBER) IS
+        cb NUMBER;
+    BEGIN
+        cb := num * num * num;
+        DBMS_OUTPUT.PUT_LINE('Cube of ' || num || ' = ' || cb);
+    END find_cube;
+
+END math_ops;
+/
+
+
+SET SERVEROUTPUT ON;
+
+BEGIN
+    math_ops.find_square(5);
+    math_ops.find_cube(3);
+END;
+/
